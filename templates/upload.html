@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>智能分析平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+            --success-color: #27ae60;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--dark-gray);
+            font-weight: 300;
+            margin-top: 0;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: block;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border: 2px dashed var(--dark-gray);
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-label:hover {
+            background-color: #e0e5e9;
+            border-color: var(--accent-color);
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background-color: #fde8e8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .hint-text {
+            font-size: 13px;
+            color: var(--dark-gray);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>智能分析平台</h1>
+            <p class="subtitle">上传微信支付交易明细证明</p>
+        </div>
+        
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" enctype="multipart/form-data">
+            <div class="card">
+                <h3 class="card-title">文档上传</h3>
+                <div class="form-group">
+                    <label for="pdf_file">选择分析文档</label>
+                    <input type="file" name="pdf_file" id="pdf_file" class="file-input" required>
+                    <label for="pdf_file" class="file-label">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <div>点击或拖拽文件到此处</div>
+                        <div id="file-name" class="file-name"></div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">参数设置</h3>
+                <div class="form-group">
+                    <label for="sensitive_words">敏感词设置</label>
+                    <input type="text" name="sensitive_words" id="sensitive_words" class="form-control" 
+                           placeholder="例如: 法院,银行,政府"
+                           value="{{ default_sensitive_words }}">
+                    <p class="hint-text">多个敏感词请用英文逗号分隔</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="industry_keywords">行业关键词设置</label>
+                    <input type="text" name="industry_keywords" id="industry_keywords" class="form-control" 
+                           placeholder="例如: 水泥,钢材,建材"
+                           value="{{ default_industry_keywords }}">
+                    <p class="hint-text">多个关键词请用英文逗号分隔</p>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">开始分析</button>
+        </form>
+    </div>
+
+    <script>
+        // 显示选中的文件名
+        document.getElementById('pdf_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '未选择文件';
+            document.getElementById('file-name').textContent = fileName;
+        });
+    </script>
+</body>
+</html>
