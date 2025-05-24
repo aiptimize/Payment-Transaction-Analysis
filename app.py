@@ -566,7 +566,7 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         region_stats = sorted_df.groupby('区域')[amount_column].sum().sort_values(ascending=False).head(5)
 
         # 打印结果
-        add_text_to_doc("\n区域消费金额统计（前5个区域）：", font_size=12, bold=True)
+        add_text_to_doc("\n区域消费金额统计：", font_size=12, bold=True)
         for line in region_stats.to_csv(sep='\t', na_rep='nan').split('\n'):
             add_text_to_doc(line)
 
@@ -575,7 +575,7 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         plt.bar(region_stats.index, region_stats.values)
         plt.xlabel('区域')
         plt.ylabel('金额(元)')
-        plt.title('区域消费金额统计（前5个区域）')
+        plt.title('区域消费金额统计')
         chart_path = os.path.join(app.config['CHART_FOLDER'], 'region_chart.png')
         plt.savefig(chart_path)
         plt.close()
