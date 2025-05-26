@@ -152,6 +152,26 @@
             color: var(--dark-gray);
             margin-top: 5px;
         }
+
+        /* 添加下载按钮样式 */
+        .download-btn {
+            display: inline-block;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .download-btn:hover {
+            background-color: #219d53;
+        }
     </style>
 </head>
 <body>
@@ -167,7 +187,6 @@
         
         <form method="POST" enctype="multipart/form-data">
             <div class="card">
-                <h3 class="card-title">文档上传</h3>
                 <div class="form-group">
                     <label for="pdf_file">选择分析文档</label>
                     <input type="file" name="pdf_file" id="pdf_file" class="file-input" required>
@@ -204,6 +223,11 @@
             
             <button type="submit" class="btn">开始分析</button>
         </form>
+
+        <!-- 添加下载按钮 -->
+        {% if 'doc_filename' in session %}
+        <a href="{{ url_for('download_file') }}" class="download-btn">点击下载分析报告</a>
+        {% endif %}
     </div>
 
     <script>

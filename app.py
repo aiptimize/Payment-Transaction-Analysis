@@ -3,33 +3,30 @@
 # import pdfplumber
 # from flask import Flask, render_template, request, redirect, url_for, send_file, session
 # from werkzeug.utils import secure_filename
-# from reportlab.lib.pagesizes import letter
-# from reportlab.pdfgen import canvas
-# from reportlab.pdfbase import pdfmetrics
-# from reportlab.pdfbase.ttfonts import TTFont
+# from docx import Document
+# from docx.shared import Pt
+# from docx.shared import Inches
+# import matplotlib.pyplot as plt
+# import matplotlib.font_manager as fm
 
 # app = Flask(__name__)
 # app.config['UPLOAD_FOLDER'] = 'uploads'
 # app.config['OUTPUT_FOLDER'] = 'output'
 # app.config['SECRET_KEY'] = 'your-secret-key-here'
+# app.config['CHART_FOLDER'] = 'charts'
 
-# # 创建上传和输出目录
+# # 创建上传、输出和图表目录
 # os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
-
-# # 注册中文字体
-# try:
-#     # 尝试注册系统字体（Windows/macOS/Linux通用）
-#     pdfmetrics.registerFont(TTFont('SimHei', 'SimHei.ttf'))
-#     DEFAULT_FONT = 'SimHei'
-# except:
-#     # 如果找不到系统字体，使用默认字体（可能无法正确显示中文）
-#     DEFAULT_FONT = 'Helvetica'
-#     print("警告: 无法注册中文字体，PDF中的中文可能显示为乱码")
+# os.makedirs(app.config['CHART_FOLDER'], exist_ok=True)
 
 # # 定义敏感词和行业关键词的默认值
 # DEFAULT_SENSITIVE_WORDS = ["法院"]
 # DEFAULT_INDUSTRY_KEYWORDS = ["水泥"]
+
+# # 设置matplotlib字体
+# plt.rcParams['font.family'] = 'SimHei'  # 使用黑体字体，可根据系统中实际字体修改
+# plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
 
 # @app.route('/', methods=['GET', 'POST'])
 # def upload_file():
@@ -56,53 +53,56 @@
 #             pdf_file.save(input_pdf_path)
 
 #             # 处理PDF文件
-#             output_filename = f"微信支付交易明细报告_{os.path.splitext(filename)[0]}.pdf"
-#             output_pdf_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
+#             output_filename = f"微信支付交易明细报告.docx"  # 修改为docx扩展名
+#             output_doc_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
 
 #             try:
 #                 # 确保输出目录存在
 #                 os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
                 
-#                 process_pdf(input_pdf_path, output_pdf_path, sensitive_words, industry_keywords)
+#                 process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywords)
                 
 #                 # 检查文件是否成功生成
-#                 if os.path.exists(output_pdf_path):
+#                 if os.path.exists(output_doc_path):
 #                     # 将文件名存储在session中，以便在另一个路由中使用
-#                     session['pdf_filename'] = output_filename
-#                     return redirect(url_for('download_file'))
+#                     session['doc_filename'] = output_filename
+#                     return redirect(url_for('upload_file'))  # 重定向回上传页面
 #                 else:
-#                     raise Exception("PDF文件未成功生成，但没有抛出具体错误")
+#                     raise Exception("DOCX文件未成功生成，但没有抛出具体错误")
                     
 #             except Exception as e:
 #                 error_msg = f"处理文件时出错: {str(e)}"
 #                 print(f"错误详情: {str(e)}")  # 打印详细错误信息到控制台
 #                 return render_template('upload.html', error=error_msg,
 #                                        default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-#                                        default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+#                                        default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+#                                        session=session)
 
 #     # 渲染上传页面
 #     return render_template('upload.html',
 #                            default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-#                            default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+#                            default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+#                            session=session)
 
 # @app.route('/download')
 # def download_file():
-#     if 'pdf_filename' not in session:
+#     if 'doc_filename' not in session:
 #         return redirect(url_for('upload_file'))
 
-#     pdf_filename = session['pdf_filename']
-#     pdf_path = os.path.join(app.config['OUTPUT_FOLDER'], pdf_filename)
+#     doc_filename = session['doc_filename']
+#     doc_path = os.path.join(app.config['OUTPUT_FOLDER'], doc_filename)
 
-#     if os.path.exists(pdf_path):
-#         return send_file(pdf_path, as_attachment=True)
+#     if os.path.exists(doc_path):
+#         return send_file(doc_path, as_attachment=True)
 #     else:
 #         # 清理无效的session数据
-#         session.pop('pdf_filename', None)
-#         return render_template('upload.html', error="生成的PDF文件不存在，请重新上传和分析",
+#         session.pop('doc_filename', None)
+#         return render_template('upload.html', error="生成的DOCX文件不存在，请重新上传和分析",
 #                                default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-#                                default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+#                                default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+#                                session=session)
 
-# def process_pdf(input_pdf_path, output_pdf_path, sensitive_words, industry_keywords):
+# def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywords):
 #     try:
 #         # 验证输入文件存在
 #         if not os.path.exists(input_pdf_path):
@@ -151,29 +151,29 @@
 #         # 确保金额列是数值类型
 #         df['金额(元)'] = pd.to_numeric(df['金额(元)'], errors='coerce')
 
-#         # 创建PDF对象
-#         c = canvas.Canvas(output_pdf_path, pagesize=letter)
-#         y_position = 750
-#         font_size = 10  # 减小字体大小以容纳更多内容
-        
-#         # 使用注册的中文字体
-#         c.setFont(DEFAULT_FONT, font_size)
+#         # 创建Word文档对象
+#         doc = Document()
 
-#         def write_to_pdf(text):
-#             nonlocal y_position
-#             if y_position < 50:
-#                 c.showPage()
-#                 y_position = 750
-#                 c.setFont(DEFAULT_FONT, font_size)
-#             c.drawString(50, y_position, text)
-#             y_position -= 15
+#         def add_text_to_doc(text, font_size=10, bold=False):
+#             paragraph = doc.add_paragraph()
+#             run = paragraph.add_run(text)
+#             run.font.size = Pt(font_size)
+#             run.font.bold = bold
 
 #         # 写入标题
-#         c.setFont(DEFAULT_FONT, 16)
-#         write_to_pdf("微信支付交易明细分析报告")
-#         c.setFont(DEFAULT_FONT, font_size)
-#         write_to_pdf("-" * 80)
-#         y_position -= 10  # 增加间距
+#         add_text_to_doc("微信支付交易明细分析报告", font_size=16, bold=True)
+#         add_text_to_doc("-" * 80)
+#         doc.add_paragraph()  # 增加间距
+
+#         # 添加目录
+#         doc.add_heading('目录', level=1)
+#         doc.add_paragraph('1. 敏感词消费记录\t\t\t\t页 1')
+#         doc.add_paragraph('2. 行业消费记录\t\t\t\t页 2')
+#         doc.add_paragraph('3. 区域消费金额统计\t\t\t\t页 3')
+#         doc.add_paragraph('4. 交易金额前5的交易对方\t\t\t页 4')
+#         doc.add_paragraph('5. 交易数量前5的交易对方\t\t\t页 5')
+#         doc.add_page_break()
+
 
 #         # 筛选包含敏感词的交易并创建副本
 #         filtered_df = df[df["交易对方"].str.contains('|'.join(sensitive_words), na=False)].copy()
@@ -191,13 +191,27 @@
 
 #             # 重置索引并打印结果
 #             sorted_df.reset_index(drop=True, inplace=True)
-#             c.setFont(DEFAULT_FONT, 12)
-#             write_to_pdf("敏感词消费记录（按金额降序排列）：")
-#             c.setFont(DEFAULT_FONT, font_size)
-#             for line in sorted_df.head(5).to_string(na_rep='nan').split('\n'):
-#                 write_to_pdf(line)
+#             doc.add_heading('1. 敏感词消费记录', level=1)
+#             add_text_to_doc("敏感词消费记录（按金额降序排列）：", font_size=12, bold=True)
+            
+#             # 创建表格
+#             table = doc.add_table(rows=1, cols=len(sorted_df.columns))
+#             hdr_cells = table.rows[0].cells
+            
+#             # 添加表头
+#             for i, col in enumerate(sorted_df.columns):
+#                 hdr_cells[i].text = col
+            
+#             # 添加数据行
+#             for _, row in sorted_df.head(5).iterrows():
+#                 row_cells = table.add_row().cells
+#                 for i, value in enumerate(row):
+#                     row_cells[i].text = str(value)
 #         else:
-#             write_to_pdf("没有敏感词消费记录")
+#             doc.add_heading('1. 敏感词消费记录', level=1)
+#             add_text_to_doc("没有敏感词消费记录")
+
+#         doc.add_page_break()
 
 #         # 筛选包含行业关键词的交易并创建副本
 #         filtered_df = df[df["交易对方"].str.contains('|'.join(industry_keywords), na=False, case=False)].copy()
@@ -214,14 +228,28 @@
 #             sorted_df = filtered_df.dropna(subset=["金额(元)"]).sort_values(by="金额(元)", ascending=False)
 
 #             # 重置索引并打印结果
-#             pd.set_option('display.max_rows', None)  # 显示所有行
-#             c.setFont(DEFAULT_FONT, 12)
-#             write_to_pdf("\n行业消费记录（按金额降序排列）：")
-#             c.setFont(DEFAULT_FONT, font_size)
-#             for line in sorted_df.reset_index(drop=True).head(5).to_string(na_rep='nan').split('\n'):
-#                 write_to_pdf(line)
+#             sorted_df.reset_index(drop=True, inplace=True)
+#             doc.add_heading('2. 行业消费记录', level=1)
+#             add_text_to_doc("行业消费记录（按金额降序排列）：", font_size=12, bold=True)
+            
+#             # 创建表格
+#             table = doc.add_table(rows=1, cols=len(sorted_df.columns))
+#             hdr_cells = table.rows[0].cells
+            
+#             # 添加表头
+#             for i, col in enumerate(sorted_df.columns):
+#                 hdr_cells[i].text = col
+            
+#             # 添加数据行
+#             for _, row in sorted_df.head(5).iterrows():
+#                 row_cells = table.add_row().cells
+#                 for i, value in enumerate(row):
+#                     row_cells[i].text = str(value)
 #         else:
-#             write_to_pdf("\n没有行业消费记录")
+#             doc.add_heading('2. 行业消费记录', level=1)
+#             add_text_to_doc("没有行业消费记录")
+
+#         doc.add_page_break()
 
 #         # 定义区域关键词库
 #         location_keywords = ["潢川县", "深圳市", "郑州市", "温县"]  # 可根据需要添加更多地区
@@ -266,11 +294,33 @@
 #         region_stats = sorted_df.groupby('区域')[amount_column].sum().sort_values(ascending=False).head(5)
 
 #         # 打印结果
-#         c.setFont(DEFAULT_FONT, 12)
-#         write_to_pdf("\n区域消费金额统计（前5个区域）：")
-#         c.setFont(DEFAULT_FONT, font_size)
-#         for line in region_stats.to_string(na_rep='nan').split('\n'):
-#             write_to_pdf(line)
+#         doc.add_heading('3. 区域消费金额统计', level=1)
+#         add_text_to_doc("区域消费金额统计：", font_size=12, bold=True)
+        
+#         # 创建表格
+#         table = doc.add_table(rows=1, cols=2)
+#         hdr_cells = table.rows[0].cells
+#         hdr_cells[0].text = '区域'
+#         hdr_cells[1].text = '金额(元)'
+        
+#         # 添加数据行
+#         for region, amount in region_stats.items():
+#             row_cells = table.add_row().cells
+#             row_cells[0].text = region
+#             row_cells[1].text = f"{amount:.2f}"
+
+#         # 绘制区域消费金额统计柱状图
+#         plt.figure(figsize=(10, 6))
+#         plt.bar(region_stats.index, region_stats.values)
+#         plt.xlabel('区域')
+#         plt.ylabel('金额(元)')
+#         plt.title('区域消费金额统计')
+#         chart_path = os.path.join(app.config['CHART_FOLDER'], 'region_chart.png')
+#         plt.savefig(chart_path)
+#         plt.close()
+#         doc.add_picture(chart_path, width=Inches(6))
+
+#         doc.add_page_break()
 
 #         # 按交易对方分组，计算交易金额总和，并筛选出交易金额前5的交易对方
 #         # 确保在进行数值计算前金额列已经转换为数值类型
@@ -279,30 +329,72 @@
 #         # 按交易对方分组，计算交易数量，并筛选出交易数量前5的交易对方
 #         top_5_by_count = df.groupby('交易对方')['金额(元)'].count().sort_values(ascending=False).head(5)
 
-#         c.setFont(DEFAULT_FONT, 12)
-#         write_to_pdf('\n交易金额前5的交易对方：')
-#         c.setFont(DEFAULT_FONT, font_size)
-#         for line in top_5_by_amount.to_string(na_rep='nan').split('\n'):
-#             write_to_pdf(line)
-            
-#         c.setFont(DEFAULT_FONT, 12)
-#         write_to_pdf('\n交易数量前5的交易对方：')
-#         c.setFont(DEFAULT_FONT, font_size)
-#         for line in top_5_by_count.to_string(na_rep='nan').split('\n'):
-#             write_to_pdf(line)
+#         doc.add_heading('4. 交易金额前5的交易对方', level=1)
+#         add_text_to_doc('交易金额前5的交易对方：', font_size=12, bold=True)
+        
+#         # 创建表格
+#         table = doc.add_table(rows=1, cols=2)
+#         hdr_cells = table.rows[0].cells
+#         hdr_cells[0].text = '交易对方'
+#         hdr_cells[1].text = '金额(元)'
+        
+#         # 添加数据行
+#         for entity, amount in top_5_by_amount.items():
+#             row_cells = table.add_row().cells
+#             row_cells[0].text = entity
+#             row_cells[1].text = f"{amount:.2f}"
 
-#         # 保存PDF文件
-#         c.save()
+#         # 绘制交易金额前5的交易对方柱状图
+#         plt.figure(figsize=(10, 6))
+#         plt.bar(top_5_by_amount.index, top_5_by_amount.values)
+#         plt.xlabel('交易对方')
+#         plt.ylabel('金额(元)')
+#         plt.title('交易金额前5的交易对方')
+#         chart_path = os.path.join(app.config['CHART_FOLDER'], 'top_5_amount_chart.png')
+#         plt.savefig(chart_path)
+#         plt.close()
+#         doc.add_picture(chart_path, width=Inches(6))
+
+#         doc.add_page_break()
+
+#         doc.add_heading('5. 交易数量前5的交易对方', level=1)
+#         add_text_to_doc('交易数量前5的交易对方：', font_size=12, bold=True)
+        
+#         # 创建表格
+#         table = doc.add_table(rows=1, cols=2)
+#         hdr_cells = table.rows[0].cells
+#         hdr_cells[0].text = '交易对方'
+#         hdr_cells[1].text = '交易数量'
+        
+#         # 添加数据行
+#         for entity, count in top_5_by_count.items():
+#             row_cells = table.add_row().cells
+#             row_cells[0].text = entity
+#             row_cells[1].text = str(count)
+
+#         # 绘制交易数量前5的交易对方柱状图
+#         plt.figure(figsize=(10, 6))
+#         plt.bar(top_5_by_count.index, top_5_by_count.values)
+#         plt.xlabel('交易对方')
+#         plt.ylabel('交易数量')
+#         plt.title('交易数量前5的交易对方')
+#         chart_path = os.path.join(app.config['CHART_FOLDER'], 'top_5_count_chart.png')
+#         plt.savefig(chart_path)
+#         plt.close()
+#         doc.add_picture(chart_path, width=Inches(6))
+
+#         # 保存Word文档
+#         doc.save(output_doc_path)
 
 #         # 验证文件是否成功保存
-#         if not os.path.exists(output_pdf_path):
-#             raise Exception(f"PDF保存失败，文件不存在: {output_pdf_path}")
+#         if not os.path.exists(output_doc_path):
+#             raise Exception(f"DOCX保存失败，文件不存在: {output_doc_path}")
 
 #     except Exception as e:
 #         # 错误发生时尝试删除不完整的文件
-#         if os.path.exists(output_pdf_path):
+#         if os.path.exists(output_doc_path):
 #             try:
-#                 os.remove(output_pdf_path)
+#                 os.remove(output_doc_path)
 #             except:
 #                 pass
 #         raise  # 重新抛出异常，让上层处理
@@ -368,7 +460,7 @@ def upload_file():
             pdf_file.save(input_pdf_path)
 
             # 处理PDF文件
-            output_filename = f"微信支付交易明细报告.doc"
+            output_filename = f"微信支付交易明细报告.docx"  # 修改为docx扩展名
             output_doc_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
 
             try:
@@ -381,21 +473,23 @@ def upload_file():
                 if os.path.exists(output_doc_path):
                     # 将文件名存储在session中，以便在另一个路由中使用
                     session['doc_filename'] = output_filename
-                    return redirect(url_for('download_file'))
+                    return redirect(url_for('upload_file'))  # 重定向回上传页面
                 else:
-                    raise Exception("DOC文件未成功生成，但没有抛出具体错误")
+                    raise Exception("DOCX文件未成功生成，但没有抛出具体错误")
                     
             except Exception as e:
                 error_msg = f"处理文件时出错: {str(e)}"
                 print(f"错误详情: {str(e)}")  # 打印详细错误信息到控制台
                 return render_template('upload.html', error=error_msg,
                                        default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-                                       default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+                                       default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+                                       session=session)
 
     # 渲染上传页面
     return render_template('upload.html',
                            default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-                           default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+                           default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+                           session=session)
 
 @app.route('/download')
 def download_file():
@@ -410,9 +504,10 @@ def download_file():
     else:
         # 清理无效的session数据
         session.pop('doc_filename', None)
-        return render_template('upload.html', error="生成的DOC文件不存在，请重新上传和分析",
+        return render_template('upload.html', error="生成的DOCX文件不存在，请重新上传和分析",
                                default_sensitive_words=','.join(DEFAULT_SENSITIVE_WORDS),
-                               default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS))
+                               default_industry_keywords=','.join(DEFAULT_INDUSTRY_KEYWORDS),
+                               session=session)
 
 def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywords):
     try:
@@ -477,6 +572,16 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         add_text_to_doc("-" * 80)
         doc.add_paragraph()  # 增加间距
 
+        # 添加目录
+        doc.add_heading('目录', level=1)
+        doc.add_paragraph('1. 敏感词消费记录\t\t\t\t页 1')
+        doc.add_paragraph('2. 行业消费记录\t\t\t\t页 2')
+        doc.add_paragraph('3. 区域消费金额统计\t\t\t\t页 3')
+        doc.add_paragraph('4. 交易金额前5的交易对方\t\t\t页 4')
+        doc.add_paragraph('5. 交易数量前5的交易对方\t\t\t页 5')
+        doc.add_page_break()
+
+
         # 筛选包含敏感词的交易并创建副本
         filtered_df = df[df["交易对方"].str.contains('|'.join(sensitive_words), na=False)].copy()
 
@@ -493,12 +598,27 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
 
             # 重置索引并打印结果
             sorted_df.reset_index(drop=True, inplace=True)
+            doc.add_heading('1. 敏感词消费记录', level=1)
             add_text_to_doc("敏感词消费记录（按金额降序排列）：", font_size=12, bold=True)
-            for line in sorted_df.head(5).to_csv(sep='\t', na_rep='nan').split('\n'):
-                add_text_to_doc(line)
-
+            
+            # 创建表格
+            table = doc.add_table(rows=1, cols=len(sorted_df.columns))
+            hdr_cells = table.rows[0].cells
+            
+            # 添加表头
+            for i, col in enumerate(sorted_df.columns):
+                hdr_cells[i].text = col
+            
+            # 添加数据行
+            for _, row in sorted_df.head(5).iterrows():
+                row_cells = table.add_row().cells
+                for i, value in enumerate(row):
+                    row_cells[i].text = str(value)
         else:
+            doc.add_heading('1. 敏感词消费记录', level=1)
             add_text_to_doc("没有敏感词消费记录")
+
+        doc.add_page_break()
 
         # 筛选包含行业关键词的交易并创建副本
         filtered_df = df[df["交易对方"].str.contains('|'.join(industry_keywords), na=False, case=False)].copy()
@@ -515,13 +635,28 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
             sorted_df = filtered_df.dropna(subset=["金额(元)"]).sort_values(by="金额(元)", ascending=False)
 
             # 重置索引并打印结果
-            pd.set_option('display.max_rows', None)  # 显示所有行
-            add_text_to_doc("\n行业消费记录（按金额降序排列）：", font_size=12, bold=True)
-            for line in sorted_df.reset_index(drop=True).head(5).to_csv(sep='\t', na_rep='nan').split('\n'):
-                add_text_to_doc(line)
-
+            sorted_df.reset_index(drop=True, inplace=True)
+            doc.add_heading('2. 行业消费记录', level=1)
+            add_text_to_doc("行业消费记录（按金额降序排列）：", font_size=12, bold=True)
+            
+            # 创建表格
+            table = doc.add_table(rows=1, cols=len(sorted_df.columns))
+            hdr_cells = table.rows[0].cells
+            
+            # 添加表头
+            for i, col in enumerate(sorted_df.columns):
+                hdr_cells[i].text = col
+            
+            # 添加数据行
+            for _, row in sorted_df.head(5).iterrows():
+                row_cells = table.add_row().cells
+                for i, value in enumerate(row):
+                    row_cells[i].text = str(value)
         else:
-            add_text_to_doc("\n没有行业消费记录")
+            doc.add_heading('2. 行业消费记录', level=1)
+            add_text_to_doc("没有行业消费记录")
+
+        doc.add_page_break()
 
         # 定义区域关键词库
         location_keywords = ["潢川县", "深圳市", "郑州市", "温县"]  # 可根据需要添加更多地区
@@ -566,9 +701,20 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         region_stats = sorted_df.groupby('区域')[amount_column].sum().sort_values(ascending=False).head(5)
 
         # 打印结果
-        add_text_to_doc("\n区域消费金额统计：", font_size=12, bold=True)
-        for line in region_stats.to_csv(sep='\t', na_rep='nan').split('\n'):
-            add_text_to_doc(line)
+        doc.add_heading('3. 区域消费金额统计', level=1)
+        add_text_to_doc("区域消费金额统计：", font_size=12, bold=True)
+        
+        # 创建表格
+        table = doc.add_table(rows=1, cols=2)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '区域'
+        hdr_cells[1].text = '金额(元)'
+        
+        # 添加数据行
+        for region, amount in region_stats.items():
+            row_cells = table.add_row().cells
+            row_cells[0].text = region
+            row_cells[1].text = f"{amount:.2f}"
 
         # 绘制区域消费金额统计柱状图
         plt.figure(figsize=(10, 6))
@@ -581,6 +727,8 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         plt.close()
         doc.add_picture(chart_path, width=Inches(6))
 
+        doc.add_page_break()
+
         # 按交易对方分组，计算交易金额总和，并筛选出交易金额前5的交易对方
         # 确保在进行数值计算前金额列已经转换为数值类型
         top_5_by_amount = df.groupby('交易对方')['金额(元)'].sum().abs().sort_values(ascending=False).head(5)
@@ -588,9 +736,20 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         # 按交易对方分组，计算交易数量，并筛选出交易数量前5的交易对方
         top_5_by_count = df.groupby('交易对方')['金额(元)'].count().sort_values(ascending=False).head(5)
 
-        add_text_to_doc('\n交易金额前5的交易对方：', font_size=12, bold=True)
-        for line in top_5_by_amount.to_csv(sep='\t', na_rep='nan').split('\n'):
-            add_text_to_doc(line)
+        doc.add_heading('4. 交易金额前5的交易对方', level=1)
+        add_text_to_doc('交易金额前5的交易对方：', font_size=12, bold=True)
+        
+        # 创建表格
+        table = doc.add_table(rows=1, cols=2)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '交易对方'
+        hdr_cells[1].text = '金额(元)'
+        
+        # 添加数据行
+        for entity, amount in top_5_by_amount.items():
+            row_cells = table.add_row().cells
+            row_cells[0].text = entity
+            row_cells[1].text = f"{amount:.2f}"
 
         # 绘制交易金额前5的交易对方柱状图
         plt.figure(figsize=(10, 6))
@@ -603,9 +762,22 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
         plt.close()
         doc.add_picture(chart_path, width=Inches(6))
 
-        add_text_to_doc('\n交易数量前5的交易对方：', font_size=12, bold=True)
-        for line in top_5_by_count.to_csv(sep='\t', na_rep='nan').split('\n'):
-            add_text_to_doc(line)
+        doc.add_page_break()
+
+        doc.add_heading('5. 交易数量前5的交易对方', level=1)
+        add_text_to_doc('交易数量前5的交易对方：', font_size=12, bold=True)
+        
+        # 创建表格
+        table = doc.add_table(rows=1, cols=2)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = '交易对方'
+        hdr_cells[1].text = '交易数量'
+        
+        # 添加数据行
+        for entity, count in top_5_by_count.items():
+            row_cells = table.add_row().cells
+            row_cells[0].text = entity
+            row_cells[1].text = str(count)
 
         # 绘制交易数量前5的交易对方柱状图
         plt.figure(figsize=(10, 6))
@@ -623,7 +795,7 @@ def process_pdf(input_pdf_path, output_doc_path, sensitive_words, industry_keywo
 
         # 验证文件是否成功保存
         if not os.path.exists(output_doc_path):
-            raise Exception(f"DOC保存失败，文件不存在: {output_doc_path}")
+            raise Exception(f"DOCX保存失败，文件不存在: {output_doc_path}")
 
     except Exception as e:
         # 错误发生时尝试删除不完整的文件
