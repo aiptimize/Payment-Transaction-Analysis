@@ -1,98 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>智能分析助手</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能分析助手 | 专业交易数据分析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --light-gray: #ecf0f1;
-            --dark-gray: #7f8c8d;
-            --success-color: #27ae60;
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #4b5563;
+            --accent-color: #3b82f6;
+            --light-gray: #f3f4f6;
+            --dark-gray: #6b7280;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
             --white: #ffffff;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--primary-color);
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: var(--secondary-color);
             line-height: 1.6;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 30px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            margin: 20px auto 0;
+            border-radius: 2px;
         }
         
         h1 {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
         }
         
         .subtitle {
             color: var(--dark-gray);
-            font-weight: 300;
+            font-weight: 400;
             margin-top: 0;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .card {
             background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            margin-bottom: 20px;
-            transition: box-shadow 0.3s ease;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
         
         .card:hover {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-2px);
         }
         
         .card-title {
-            font-size: 18px;
-            font-weight: 500;
+            font-size: 1.25rem;
+            font-weight: 600;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--secondary-color);
             border-bottom: 1px solid var(--light-gray);
-            padding-bottom: 10px;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            position: relative;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 500;
             color: var(--secondary-color);
+            font-size: 0.95rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border-color 0.3s;
+            padding: 14px 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
             box-sizing: border-box;
+            background-color: var(--light-gray);
         }
         
         .form-control:focus {
             outline: none;
             border-color: var(--accent-color);
+            background-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
         .file-input {
@@ -101,76 +141,197 @@
         
         .file-label {
             display: block;
-            padding: 15px;
+            padding: 30px 20px;
             background-color: var(--light-gray);
             border: 2px dashed var(--dark-gray);
-            border-radius: 4px;
+            border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
         
         .file-label:hover {
-            background-color: #e0e5e9;
+            background-color: #e5e7eb;
             border-color: var(--accent-color);
         }
         
+        .file-label svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .file-label div {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+        
         .file-name {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 15px;
+            font-size: 0.9rem;
             color: var(--dark-gray);
+            font-weight: 500;
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 20px;
+            color: var(--primary-color);
         }
         
         .btn {
-            background-color: var(--accent-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
+            padding: 16px 30px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: 500;
-            transition: background-color 0.3s;
+            transition: var(--transition);
             width: 100%;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
         
         .btn:hover {
-            background-color: #2980b9;
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-color));
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .error {
-            color: #e74c3c;
-            background-color: #fde8e8;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border-left: 4px solid #e74c3c;
+            color: var(--error-color);
+            background-color: rgba(239, 68, 68, 0.1);
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--error-color);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .error i {
+            margin-right: 10px;
+            font-size: 1.2rem;
         }
         
         .hint-text {
-            font-size: 13px;
+            font-size: 0.85rem;
             color: var(--dark-gray);
-            margin-top: 5px;
+            margin-top: 8px;
+            font-style: italic;
         }
-
-        /* 添加下载按钮样式 */
+        
+        .download-section {
+            text-align: center;
+            margin-top: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
         .download-btn {
-            display: inline-block;
-            background-color: var(--success-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--success-color), #34d399);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
+            padding: 16px 35px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: 500;
-            transition: background-color 0.3s;
+            transition: var(--transition);
             text-decoration: none;
-            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
+        
         .download-btn:hover {
-            background-color: #219d53;
+            background: linear-gradient(135deg, #0d9f6e, #2bbd8d);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .download-btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        
+        .feature {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+            padding: 25px;
+            background: var(--white);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .feature-desc {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            line-height: 1.5;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 30px auto;
+                padding: 0 20px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .features {
+                flex-direction: column;
+            }
+            
+            .feature {
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
@@ -178,32 +339,61 @@
     <div class="container">
         <div class="header">
             <h1>智能分析助手</h1>
-            <p class="subtitle">上传交易明细证明</p>
+            <p class="subtitle">上传交易明细证明，获取专业数据分析报告</p>
         </div>
         
         {% if error %}
-        <div class="error">{{ error }}</div>
+        <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ error }}
+        </div>
         {% endif %}
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">数据安全</h3>
+                <p class="feature-desc">上传文件均加密处理，分析完成后自动删除，保障您的数据安全</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">智能分析</h3>
+                <p class="feature-desc">基于AI算法深度分析交易数据，识别关键模式和异常点</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3 class="feature-title">专业报告</h3>
+                <p class="feature-desc">生成详细分析报告，包含可视化图表，支持报告点击下载</p>
+            </div>
+        </div>
         
         <form method="POST" enctype="multipart/form-data">
             <div class="card">
+                <h3 class="card-title"><i class="fas fa-file-upload"></i>上传分析文档</h3>
                 <div class="form-group">
-                    <label for="pdf_file">选择分析文档</label>
-                    <input type="file" name="pdf_file" id="pdf_file" class="file-input" required>
+                    <label for="pdf_file">选择PDF文件</label>
+                    <input type="file" name="pdf_file" id="pdf_file" class="file-input" accept=".pdf,.xlsx,.xls" required>
                     <label for="pdf_file" class="file-label">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                         <div>点击或拖拽文件到此处</div>
+                        <div>支持PDF格式</div>
                         <div id="file-name" class="file-name"></div>
                     </label>
                 </div>
             </div>
             
             <div class="card">
-                <h3 class="card-title">参数设置</h3>
+                <h3 class="card-title"><i class="fas fa-cog"></i>分析参数设置</h3>
                 <div class="form-group">
                     <label for="sensitive_words">敏感词设置</label>
                     <input type="text" name="sensitive_words" id="sensitive_words" class="form-control" 
@@ -221,12 +411,18 @@
                 </div>
             </div>
             
-            <button type="submit" class="btn">开始分析</button>
+            <button type="submit" class="btn">
+                <i class="fas fa-play-circle"></i> 开始分析
+            </button>
         </form>
 
-        <!-- 添加下载按钮 -->
         {% if 'doc_filename' in session %}
-        <a href="{{ url_for('download_file') }}" class="download-btn">点击下载分析报告</a>
+        <div class="download-section">
+            <a href="{{ url_for('download_file') }}" class="download-btn">
+                <i class="fas fa-download"></i> 下载分析报告
+            </a>
+            <p class="hint-text">报告将在24小时后自动删除，请及时下载</p>
+        </div>
         {% endif %}
     </div>
 
@@ -234,7 +430,41 @@
         // 显示选中的文件名
         document.getElementById('pdf_file').addEventListener('change', function(e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : '未选择文件';
-            document.getElementById('file-name').textContent = fileName;
+            const fileNameElement = document.getElementById('file-name');
+            fileNameElement.textContent = fileName;
+            
+            // 添加动画效果
+            fileNameElement.style.animation = 'none';
+            setTimeout(() => {
+                fileNameElement.style.animation = 'fadeIn 0.5s ease-out';
+            }, 10);
+        });
+
+        // 拖放文件功能
+        const fileLabel = document.querySelector('.file-label');
+        const fileInput = document.getElementById('pdf_file');
+
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = 'var(--accent-color)';
+            fileLabel.style.backgroundColor = '#e5e7eb';
+        });
+
+        fileLabel.addEventListener('dragleave', () => {
+            fileLabel.style.borderColor = 'var(--dark-gray)';
+            fileLabel.style.backgroundColor = 'var(--light-gray)';
+        });
+
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = 'var(--dark-gray)';
+            fileLabel.style.backgroundColor = 'var(--light-gray)';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
         });
     </script>
 </body>
